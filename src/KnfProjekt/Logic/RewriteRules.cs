@@ -81,8 +81,37 @@ namespace KnfProjekt.Logic
 
         public static Entity DistributeOrOverAnd(Entity expr)
         {
-            // A or (B and C)
-            return expr;
+            return TreeUtils.UntilStable(expr, e =>
+                e.Replace(node =>
+                {
+                    if (node is not Entity.Orf orNode)
+                        return node;
+ 
+                    var andChild = orNode.DirectChildren.FirstOrDefault(ch => ch is Entity.Andf);
+                    if (andChild is null)
+                        return node; 
+
+                    var andNode = (Entity.Andf)andChild;
+
+                    // "Rest" = OR aller anderen Kinder (alles außer dem AND-Kind)
+                    // Beispiel: (X or (A and B)) -> Rest = X
+                    // Beispiel: (p or q or (A and B)) -> Rest = (p or q)
+                    var restParts = orNode.DirectChildren.Where(ch => !ReferenceEquals(ch, andChild)).ToList();
+                    var restOr = OrAll(restParts);
+
+                    // Distributiv:
+                    // restOr OR (A1 AND A2 ... AND An)
+                    // => (restOr OR A1) AND (restOr OR A2) ... AND (restOr OR An)
+                    var distributedClauses =
+                        andNode.DirectChildren
+                               .Select(a => (Entity)(restOr | a))
+                               .ToList();
+
+                    return AndAll(distributedClauses);
+                })
+            );
         }
     }
+
+        
 }
