@@ -11,10 +11,13 @@ class Program
 
         Console.WriteLine("Input:");
         Console.WriteLine(expr);
+        TreeUtils.Dump(expr);   
 
         var knf = KnfPipeline.ToKnf(expr);
 
         Console.WriteLine("\nKNF:");
         Console.WriteLine(knf);
+        TreeUtils.Dump(knf);
+
     }
 }
