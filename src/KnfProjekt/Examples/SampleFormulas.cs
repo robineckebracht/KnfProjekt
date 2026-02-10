@@ -5,6 +5,6 @@ namespace KnfProjekt.Examples
     public static class SampleFormulas
     {
         public static Entity Basic =>
-            "a implies (b and not c)";
+            "a implies (not (b and not c))";
     }
 }
